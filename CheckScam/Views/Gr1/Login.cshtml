@@ -1,0 +1,27 @@
+﻿@{
+    Layout = "~/Views/Shared/_Gr1Layout.cshtml";
+}
+
+<div class="card shadow p-4 mx-auto" style="max-width: 400px;">
+    <h3 class="mb-4">🔑 Đăng nhập</h3>
+    <form method="post" asp-action="Login" asp-controller="Gr1">
+        <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <div class="mb-3">
+            <label class="form-label">📧 Tài khoản</label>
+            <input type="text" name="username" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">🔒 Mật khẩu</label>
+            <input type="password" name="password" class="form-control" required />
+        </div>
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+        <button type="submit" class="btn btn-primary w-100">🚀 Vào!!</button>
+    </form>
+    <p class="text-center mt-3">
+        Chưa tạo tài khoản hả ní? 🐧
+        <a href="@Url.Action("Register", "Gr1")">Đăng ký ngay ⁉️</a>
+    </p>
+</div>

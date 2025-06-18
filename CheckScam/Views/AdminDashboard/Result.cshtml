@@ -1,0 +1,46 @@
+﻿@model CheckScam.Models.ScamPost
+
+@{
+    Layout = "~/Views/Shared/_Gr1Layout.cshtml";
+}
+
+<div class="card shadow rounded p-4">
+    <h3 class="mb-4">📌 Chi tiết bài tố cáo</h3>
+
+    <p><strong>👤 Tên:</strong> @Model.NameScam</p>
+    <p><strong>🏦 Tài khoản ngân hàng:</strong> @(Model.StkScam ?? "Không có")</p>
+    <p><strong>📞 Số điện thoại:</strong> @(Model.SdtScam ?? "Không có")</p>
+    <p><strong>📝 Nội dung:</strong> @Model.NoiDung</p>
+
+    <p><strong>📷 Bằng chứng:</strong></p>
+    <div class="row mb-3">
+        @if (Model.Images != null && Model.Images.Any())
+        {
+            foreach (var image in Model.Images)
+            {
+                <div class="col-md-4 mb-3">
+                    <img src="@image.ImagePath" class="img-fluid rounded shadow" alt="Bằng chứng">
+                </div>
+            }
+        }
+        else
+        {
+            <p>Không có ảnh</p>
+        }
+    </div>
+
+    <p><strong>📅 Ngày đăng:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+
+    <form method="post" asp-action="ApproveOrReject" asp-route-id="@Model.Id" class="mb-3 d-inline">
+        <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <button type="submit" name="action" value="approve" class="btn btn-success me-2">✔ Duyệt bài</button>
+        <button type="submit" name="action" value="reject" class="btn btn-danger me-2">✖ Từ chối</button>
+    </form>
+
+    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bài tố cáo này?');">
+        <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <button type="submit" class="btn btn-dark">🗑️ Xóa bài</button>
+    </form>
+
+    <a href="@Url.Action("Index", "AdminDashboard")" class="btn btn-secondary ms-2">⬅ Quay lại danh sách</a>
+</div>

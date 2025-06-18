@@ -1,0 +1,28 @@
+﻿@{
+    Layout = "~/Views/Shared/_Gr1Layout.cshtml";
+}
+
+<div class="card shadow p-4">
+    <h3 class="mb-4">📘 Hướng dẫn sử dụng CheckScam</h3>
+    <div class="mb-4">
+        <h5>🔍 1. Tra cứu số tài khoản hoặc số điện thoại</h5>
+        <p>Người dùng có thể nhập số tài khoản ngân hàng hoặc số điện thoại vào thanh tìm kiếm ở đầu trang. Hệ thống sẽ trả về danh sách các bài tố cáo có liên quan nếu có.</p>
+    </div>
+    <div class="mb-4">
+        <h5>📢 2. Gửi bài tố cáo</h5>
+        <p>Để tố cáo một đối tượng lừa đảo, bạn cần đăng nhập. Sau đó, vào mục Tố cáo và điền đầy đủ thông tin như tên đối tượng, số tài khoản/số điện thoại, nội dung tố cáo và hình ảnh liên quan (nếu có).</p>
+    </div>
+    <div class="mb-4">
+        <h5>🕵️‍♂️ 3. Quản trị viên (Admin)</h5>
+        <p>Các bài viết mới sẽ được chuyển đến khu vực kiểm duyệt của quản trị viên. Chỉ những bài được duyệt mới hiển thị công khai. Quản trị viên có thể xem Lịch sử bài tố cáo chưa duyệt và Danh sách các bài tố cáo thông qua menu điều hướng (chỉ hiển thị nếu bạn là admin).</p>
+    </div>
+    <div class="mb-4">
+        <h5>📂 4. Lưu ý</h5>
+        <ul>
+            <li>Không đăng bài tố cáo sai sự thật, vu khống.</li>
+            <li>Bài viết có nội dung vi phạm sẽ bị gỡ bỏ ngay lập tức.</li>
+            <li>Thông tin người dùng được bảo mật theo Chính sách bảo mật.</li>
+        </ul>
+    </div>
+    <a href="@Url.Action("Index", "Gr1")" class="btn btn-secondary">⬅️ Quay về trang chủ</a>
+</div>
