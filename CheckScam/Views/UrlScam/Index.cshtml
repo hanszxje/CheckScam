@@ -1,4 +1,4 @@
-﻿@model List<CheckScam.Models.ScamPost>
+﻿@model List<CheckScam.Models.ScamUrl>
 
 @{
     Layout = "~/Views/Shared/_Gr1Layout.cshtml";
@@ -12,12 +12,9 @@
             <div class="col-md-4 mb-4">
                 <div class="card shadow">
                     <div class="card-body">
-                        <h5 class="card-title">Tố cáo: @(scam.StkScam ?? scam.SdtScam ?? "Không xác định")</h5>
-                        <p class="card-text">💳 Tài khoản ngân hàng: @(scam.StkScam ?? "Không có")</p>
-                        <p class="card-text">📞 Số điện thoại: @(scam.SdtScam ?? "Không có")</p>
-                        <p class="card-text">📝 Nội dung: @scam.NoiDung.Substring(0, Math.Min(50, scam.NoiDung.Length))@(scam.NoiDung.Length > 50 ? "..." : "")</p>
+                        <p class="card-text">🌐 URL: <a href="@scam.Url" target="_blank">@scam.Url</a></p>
                         <p class="card-text">📅 Ngày đăng: @scam.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                        <a href="@Url.Action("ScamDetail", "Gr1", new { id = scam.Id })" class="btn btn-primary">📖 Xem chi tiết</a>
+                        <a href="@Url.Action("Detail", "UrlScam", new { id = scam.Id })" class="btn btn-primary">📖 Xem chi tiết</a>
                     </div>
                 </div>
             </div>
@@ -26,7 +23,7 @@
     else
     {
         <div class="col-12">
-            <p class="text-center">🚫 Không tìm thấy bài tố cáo nào.</p>
+            <p class="text-center">🚫 Không tìm thấy URL tố cáo nào.</p>
         </div>
     }
 </div>

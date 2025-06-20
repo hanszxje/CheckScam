@@ -7,7 +7,6 @@
 <div class="card shadow rounded p-4">
     <h3 class="mb-4">📌 Chi tiết bài tố cáo</h3>
 
-    <p><strong>👤 Tên:</strong> @Model.NameScam</p>
     <p><strong>🏦 Tài khoản ngân hàng:</strong> @(Model.StkScam ?? "Không có")</p>
     <p><strong>📞 Số điện thoại:</strong> @(Model.SdtScam ?? "Không có")</p>
     <p><strong>📝 Nội dung:</strong> @Model.NoiDung</p>
@@ -30,14 +29,15 @@
     </div>
 
     <p><strong>📅 Ngày đăng:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+    <p><strong>Trạng thái:</strong> @Model.Status</p>
 
-    <form method="post" asp-action="ApproveOrReject" asp-route-id="@Model.Id" class="mb-3 d-inline">
+    <form method="post" asp-action="ApproveOrReject" asp-route-id="@Model.Id" asp-route-type="post" class="mb-3 d-inline">
         <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
         <button type="submit" name="action" value="approve" class="btn btn-success me-2">✔ Duyệt bài</button>
         <button type="submit" name="action" value="reject" class="btn btn-danger me-2">✖ Từ chối</button>
     </form>
 
-    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bài tố cáo này?');">
+    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" asp-route-type="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bài tố cáo này?');">
         <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
         <button type="submit" class="btn btn-dark">🗑️ Xóa bài</button>
     </form>

@@ -13,5 +13,6 @@ namespace CheckScam.Models
 
         public DbSet<ScamPost> ScamPosts { get; set; }
         public DbSet<ScamImage> ScamImages { get; set; }
+        public DbSet<ScamUrl> ScamUrls { get; set; }
     }
 }

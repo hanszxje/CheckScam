@@ -1,28 +1,20 @@
-﻿@model CheckScam.Data.PostScamDto
+﻿@model CheckScam.Data.PostScamUrlDto
 
 @{
     Layout = "~/Views/Shared/_Gr1Layout.cshtml";
 }
 
 <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
-    <h3 class="mb-4">📢 Tố cáo lừa đảo SĐT</h3>
-    <form method="post" asp-action="Report" asp-controller="Gr1" enctype="multipart/form-data" id="reportForm">
+    <h3 class="mb-4">📢 Tố cáo lừa đảo URL</h3>
+    <form method="post" asp-action="ReportUrl" asp-controller="Gr1" id="reportForm">
         <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
         <div class="mb-3">
-            <label class="form-label">💳 Số tài khoản ngân hàng</label>
-            <input type="text" asp-for="StkScam" class="form-control" maxlength="50" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">📞 Số điện thoại</label>
-            <input type="text" asp-for="SdtScam" class="form-control" maxlength="20" />
+            <label class="form-label">🌐 URL website lừa đảo</label>
+            <input type="url" asp-for="Url" class="form-control" placeholder="https://example.com" maxlength="500" required />
         </div>
         <div class="mb-3">
             <label class="form-label">📝 Nội dung tố cáo</label>
             <textarea asp-for="NoiDung" class="form-control" rows="5" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">📷 Bằng chứng hình ảnh</label>
-            <input type="file" name="images" class="form-control" multiple accept="image/*" />
         </div>
         @if (TempData["Error"] != null)
         {
@@ -39,12 +31,19 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const reportForm = document.getElementById('reportForm');
+        const urlInput = reportForm.querySelector('input[name="Url"]');
         const noiDung = reportForm.querySelector('textarea[name="NoiDung"]');
 
         reportForm.addEventListener('submit', function (e) {
+            if (!urlInput.value || urlInput.value.trim() === '') {
+                e.preventDefault();
+                alert('Vui lòng điền URL website lừa đảo!');
+                return;
+            }
             if (!noiDung.value || noiDung.value.trim() === '') {
                 e.preventDefault();
                 alert('Vui lòng điền nội dung tố cáo!');
+                return;
             }
         });
     });

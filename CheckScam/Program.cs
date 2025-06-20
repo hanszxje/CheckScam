@@ -70,6 +70,11 @@ app.UseFileServer(new FileServerOptions
 });
 
 app.MapControllerRoute(
+    name: "urlScam",
+    pattern: "UrlScam/{action=Index}/{id?}",
+    defaults: new { controller = "UrlScam" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Gr1}/{action=Index}/{id?}");
 

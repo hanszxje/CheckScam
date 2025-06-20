@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="media\scam_images\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

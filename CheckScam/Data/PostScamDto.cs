@@ -4,10 +4,6 @@ namespace CheckScam.Data
 {
     public class PostScamDto
     {
-        [Required]
-        [StringLength(255)]
-        public string NameScam { get; set; }
-
         [StringLength(50)]
         public string? StkScam { get; set; }
 

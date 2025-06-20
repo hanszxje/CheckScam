@@ -20,13 +20,15 @@ namespace CheckScam.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public Gr1Controller(CheckScamDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IHttpClientFactory httpClientFactory)
+        public Gr1Controller(CheckScamDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index(int? page, string q)
@@ -162,43 +164,112 @@ namespace CheckScam.Controllers
         [HttpPost]
         public async Task<IActionResult> Report(PostScamDto model, List<IFormFile> images)
         {
-            if (!ModelState.IsValid)
+            Console.WriteLine($"Report SĐT called - model: {model?.StkScam}, {model?.SdtScam}, {model?.NoiDung}, images count: {images?.Count}");
+
+            if (!ModelState.IsValid || string.IsNullOrEmpty(model.NoiDung))
             {
-                TempData["Error"] = "❌ Dữ liệu không hợp lệ!";
+                TempData["Error"] = "❌ Vui lòng điền đầy đủ nội dung tố cáo!";
                 return View(model);
             }
 
             var scamPost = new ScamPost
             {
-                NameScam = model.NameScam,
                 StkScam = model.StkScam,
                 SdtScam = model.SdtScam,
                 NoiDung = model.NoiDung,
                 Status = "pending"
             };
             _context.ScamPosts.Add(scamPost);
-            await _context.SaveChangesAsync();
-
-            foreach (var image in images)
+            try
             {
-                if (image != null && image.Length > 0)
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"ScamPost saved with Id: {scamPost.Id}");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"❌ Lỗi lưu database: {ex.Message} - StackTrace: {ex.StackTrace}";
+                return View(model);
+            }
+
+            if (images != null && images.Any())
+            {
+                foreach (var image in images)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "media", "scam_images", fileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    if (image != null && image.Length > 0)
                     {
-                        await image.CopyToAsync(stream);
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "media", "scam_images", fileName);
+                        try
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+                            _context.ScamImages.Add(new ScamImage
+                            {
+                                ScamPostId = scamPost.Id,
+                                ImagePath = $"/media/scam_images/{fileName}"
+                            });
+                            await _context.SaveChangesAsync();
+                            Console.WriteLine($"Image saved at: {filePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            TempData["Error"] = $"❌ Lỗi lưu ảnh: {ex.Message} - StackTrace: {ex.StackTrace}";
+                            return View(model);
+                        }
                     }
-                    _context.ScamImages.Add(new ScamImage
-                    {
-                        ScamPostId = scamPost.Id,
-                        ImagePath = $"/media/scam_images/{fileName}"
-                    });
                 }
             }
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "✅ Tố cáo đã được gửi và đang chờ duyệt!";
+
+            TempData["Success"] = "✅ Tố cáo SĐT đã được gửi và đang chờ duyệt!";
+            return RedirectToAction("Index");
+        }
+
+        [Authorize]
+        public IActionResult ReportUrl()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ReportUrl(PostScamUrlDto model)
+        {
+            Console.WriteLine($"Report URL called - model: {model?.Url}, {model?.NoiDung}");
+
+            if (!ModelState.IsValid || string.IsNullOrEmpty(model.Url) || string.IsNullOrEmpty(model.NoiDung))
+            {
+                TempData["Error"] = "❌ Vui lòng điền đầy đủ URL và nội dung tố cáo!";
+                return View(model);
+            }
+
+            if (!Uri.IsWellFormedUriString(model.Url, UriKind.Absolute))
+            {
+                TempData["Error"] = "❌ URL không hợp lệ!";
+                return View(model);
+            }
+
+            var scamUrl = new ScamUrl
+            {
+                Url = model.Url,
+                NoiDung = model.NoiDung,
+                Status = "pending"
+            };
+            _context.ScamUrls.Add(scamUrl);
+            try
+            {
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"ScamUrl saved with Id: {scamUrl.Id}");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"❌ Lỗi lưu database: {ex.Message} - StackTrace: {ex.StackTrace}";
+                return View(model);
+            }
+
+            TempData["Success"] = "✅ Tố cáo URL đã được gửi và đang chờ duyệt!";
             return RedirectToAction("Index");
         }
 
@@ -217,7 +288,6 @@ namespace CheckScam.Controllers
 
             try
             {
-                // Xóa file hình ảnh vật lý
                 foreach (var image in scam.Images)
                 {
                     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.ImagePath.TrimStart('/'));
@@ -227,12 +297,11 @@ namespace CheckScam.Controllers
                     }
                 }
 
-                // Xóa bài và hình ảnh trong database
                 _context.ScamImages.RemoveRange(scam.Images);
                 _context.ScamPosts.Remove(scam);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = $"🗑️ Đã xóa bài tố cáo: {scam.NameScam}";
+                TempData["Success"] = $"🗑️ Đã xóa bài tố cáo: {scam.StkScam ?? scam.SdtScam ?? "không xác định"}";
             }
             catch (Exception ex)
             {
@@ -248,9 +317,9 @@ namespace CheckScam.Controllers
         {
             var prompt = @"{
                 ""prompt"": ""Hãy trả về JSON với danh sách 3 vụ lừa đảo phổ biến. Dữ liệu phải là JSON hợp lệ với format: [
-                    {""name"": ""Tên lừa đảo"", ""bank_account"": ""Số tài khoản"", ""phone_number"": ""Số điện thoại"", ""description"": ""Chi tiết vụ lừa đảo""},
-                    {""name"": ""..."", ""bank_account"": ""..."", ""phone_number"": ""..."", ""description"": ""...""},
-                    {""name"": ""..."", ""bank_account"": ""..."", ""phone_number"": ""..."", ""description"": ""...""}
+                    {""bank_account"": ""Số tài khoản"", ""phone_number"": ""Số điện thoại"", ""description"": ""Chi tiết vụ lừa đảo""},
+                    {""bank_account"": ""..."", ""phone_number"": ""..."", ""description"": ""...""},
+                    {""bank_account"": ""..."", ""phone_number"": ""..."", ""description"": ""...""}
                 ] Chỉ trả về JSON, không kèm theo văn bản giải thích khác. Lưu ý: lấy thông tin thật, không phải ví dụ, hãy lấy các bài có số điện thoại hoặc số tài khoản ngân hàng (1 trong 2 hoặc cả 2), các bài không có 1 trong 2 thứ đó không lấy, lấy từ các trang báo như https://vnexpress.net, https://tuoitre.vn, https://thanhnien.vn, https://dantri.com.vn, https://vietnamnet.vn, https://zingnews.vn, https://nhandan.vn, https://laodong.vn, https://kenh14.vn, https://plo.vn.""
             }";
 
@@ -267,7 +336,7 @@ namespace CheckScam.Controllers
                     var sdtScam = Regex.Replace(item["phone_number"] ?? "", @"\D", "");
                     sdtScam = string.IsNullOrEmpty(sdtScam) || sdtScam.ToLower() == "không có" ? null : sdtScam;
                     var existingPost = await _context.ScamPosts
-                        .FirstOrDefaultAsync(p => p.NameScam == item["name"]);
+                        .FirstOrDefaultAsync(p => p.StkScam == item["bank_account"] && p.SdtScam == sdtScam);
                     if (existingPost != null)
                     {
                         existingPost.StkScam = item["bank_account"];
@@ -279,7 +348,6 @@ namespace CheckScam.Controllers
                     {
                         _context.ScamPosts.Add(new ScamPost
                         {
-                            NameScam = item["name"],
                             StkScam = item["bank_account"],
                             SdtScam = sdtScam,
                             NoiDung = item["description"],
@@ -304,7 +372,6 @@ namespace CheckScam.Controllers
                 .Select(p => new GetAllPostDto
                 {
                     Id = p.Id,
-                    NameScam = p.NameScam,
                     StkScam = p.StkScam,
                     SdtScam = p.SdtScam,
                     NoiDung = p.NoiDung,
@@ -325,7 +392,6 @@ namespace CheckScam.Controllers
 
             var scamPost = new ScamPost
             {
-                NameScam = model.NameScam,
                 StkScam = model.StkScam,
                 SdtScam = model.SdtScam,
                 NoiDung = model.NoiDung,

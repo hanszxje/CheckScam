@@ -5,7 +5,7 @@
 }
 
 <div class="card shadow p-4">
-    <h3 class="mb-4">🚨 @Model.NameScam</h3>
+    <h3 class="mb-4">🚨 Tố cáo: @(Model.StkScam ?? Model.SdtScam ?? "Không xác định")</h3>
     <p><strong>💳 Số tài khoản:</strong> @(Model.StkScam ?? "Không có")</p>
     <p><strong>📞 Số điện thoại:</strong> @(Model.SdtScam ?? "Không có")</p>
     <div class="mb-3">

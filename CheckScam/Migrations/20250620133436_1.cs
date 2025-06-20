@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CheckScam.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class _1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,7 +56,6 @@ namespace CheckScam.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    NameScam = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     StkScam = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     SdtScam = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     NoiDung = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -66,6 +65,22 @@ namespace CheckScam.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ScamPosts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ScamUrls",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    NoiDung = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ScamUrls", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -259,6 +274,9 @@ namespace CheckScam.Migrations
 
             migrationBuilder.DropTable(
                 name: "ScamImages");
+
+            migrationBuilder.DropTable(
+                name: "ScamUrls");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
