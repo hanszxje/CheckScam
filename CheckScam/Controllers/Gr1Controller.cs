@@ -36,9 +36,13 @@ namespace CheckScam.Controllers
             var scamPosts = _context.ScamPosts
                 .Where(p => p.Status == "approved");
 
+            var scamUrls = _context.ScamUrls
+                .Where(u => u.Status == "approved");
+
             if (!string.IsNullOrEmpty(q))
             {
                 scamPosts = scamPosts.Where(p => p.StkScam.Contains(q) || p.SdtScam.Contains(q));
+                scamUrls = scamUrls.Where(u => u.Url.Contains(q));
             }
 
             int pageSize = 6;
@@ -48,10 +52,16 @@ namespace CheckScam.Controllers
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+            var paginatedUrls = await scamUrls
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             ViewBag.PageNumber = pageNumber;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)await scamPosts.CountAsync() / pageSize);
-            return View(paginatedPosts);
+            ViewBag.TotalPages = (int)Math.Ceiling((double)Math.Max(await scamPosts.CountAsync(), await scamUrls.CountAsync()) / pageSize);
+            ViewBag.ScamPosts = paginatedPosts;
+            ViewBag.ScamUrls = paginatedUrls;
+            return View();
         }
 
         public IActionResult Login()
@@ -155,21 +165,21 @@ namespace CheckScam.Controllers
         }
 
         [Authorize]
-        public IActionResult Report()
+        public IActionResult ReportPhone()
         {
-            return View();
+            return View("Report");
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Report(PostScamDto model, List<IFormFile> images)
+        public async Task<IActionResult> ReportPhone(PostScamDto model, List<IFormFile> images)
         {
             Console.WriteLine($"Report SĐT called - model: {model?.StkScam}, {model?.SdtScam}, {model?.NoiDung}, images count: {images?.Count}");
 
             if (!ModelState.IsValid || string.IsNullOrEmpty(model.NoiDung))
             {
                 TempData["Error"] = "❌ Vui lòng điền đầy đủ nội dung tố cáo!";
-                return View(model);
+                return View("Report", model);
             }
 
             var scamPost = new ScamPost
@@ -188,7 +198,7 @@ namespace CheckScam.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"❌ Lỗi lưu database: {ex.Message} - StackTrace: {ex.StackTrace}";
-                return View(model);
+                return View("Report", model);
             }
 
             if (images != null && images.Any())
@@ -217,7 +227,7 @@ namespace CheckScam.Controllers
                         catch (Exception ex)
                         {
                             TempData["Error"] = $"❌ Lỗi lưu ảnh: {ex.Message} - StackTrace: {ex.StackTrace}";
-                            return View(model);
+                            return View("Report", model);
                         }
                     }
                 }
@@ -230,7 +240,7 @@ namespace CheckScam.Controllers
         [Authorize]
         public IActionResult ReportUrl()
         {
-            return View();
+            return View("ReportUrl");
         }
 
         [Authorize]
@@ -242,13 +252,13 @@ namespace CheckScam.Controllers
             if (!ModelState.IsValid || string.IsNullOrEmpty(model.Url) || string.IsNullOrEmpty(model.NoiDung))
             {
                 TempData["Error"] = "❌ Vui lòng điền đầy đủ URL và nội dung tố cáo!";
-                return View(model);
+                return View("ReportUrl", model);
             }
 
             if (!Uri.IsWellFormedUriString(model.Url, UriKind.Absolute))
             {
                 TempData["Error"] = "❌ URL không hợp lệ!";
-                return View(model);
+                return View("ReportUrl", model);
             }
 
             var scamUrl = new ScamUrl
@@ -266,11 +276,23 @@ namespace CheckScam.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"❌ Lỗi lưu database: {ex.Message} - StackTrace: {ex.StackTrace}";
-                return View(model);
+                return View("ReportUrl", model);
             }
 
             TempData["Success"] = "✅ Tố cáo URL đã được gửi và đang chờ duyệt!";
             return RedirectToAction("Index");
+        }
+
+        [Authorize]
+        public async Task<IActionResult> UrlDetail(int id)
+        {
+            var scamUrl = await _context.ScamUrls
+                .FirstOrDefaultAsync(u => u.Id == id);
+            if (scamUrl == null)
+            {
+                return NotFound();
+            }
+            return View(scamUrl);
         }
 
         [Authorize(Roles = "Superuser")]
@@ -306,6 +328,32 @@ namespace CheckScam.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"❌ Lỗi khi xóa bài: {ex.Message}";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "Superuser")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteUrl(int id)
+        {
+            var scamUrl = await _context.ScamUrls
+                .FirstOrDefaultAsync(u => u.Id == id);
+            if (scamUrl == null)
+            {
+                TempData["Error"] = $"❌ Không tìm thấy URL tố cáo!";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                _context.ScamUrls.Remove(scamUrl);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = $"🗑️ Đã xóa URL tố cáo: {scamUrl.Url}";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"❌ Lỗi khi xóa URL: {ex.Message}";
             }
 
             return RedirectToAction("Index");

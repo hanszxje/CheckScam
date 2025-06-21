@@ -1,0 +1,27 @@
+﻿@model CheckScam.Models.ScamUrl
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow rounded p-4">
+    <h3 class="mb-4">📌 Chi tiết URL tố cáo</h3>
+
+    <p><strong>🌐 URL:</strong> <a href="@Model.Url" target="_blank">@Model.Url</a></p>
+    <p><strong>📝 Nội dung:</strong> @Model.NoiDung</p>
+    <p><strong>📅 Ngày đăng:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+    <p><strong>Trạng thái:</strong> @Model.Status</p>
+
+    <form method="post" asp-action="ApproveOrReject" asp-route-id="@Model.Id" asp-route-type="url" class="mb-3 d-inline">
+        <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <button type="submit" name="action" value="approve" class="btn btn-success me-2">✔ Duyệt URL</button>
+        <button type="submit" name="action" value="reject" class="btn btn-danger me-2">✖ Từ chối</button>
+    </form>
+
+    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" asp-route-type="url" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa URL tố cáo này?');">
+        <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <button type="submit" class="btn btn-dark">🗑️ Xóa URL</button>
+    </form>
+
+    <a href="@Url.Action("Index", "AdminDashboard")" class="btn btn-secondary ms-2">⬅ Quay lại danh sách</a>
+</div>

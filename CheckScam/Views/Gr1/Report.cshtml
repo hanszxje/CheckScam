@@ -5,8 +5,8 @@
 }
 
 <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
-    <h3 class="mb-4">📢 Tố cáo lừa đảo SĐT</h3>
-    <form method="post" asp-action="Report" asp-controller="Gr1" enctype="multipart/form-data" id="reportForm">
+    <h3 class="mb-4">📢 Tố cáo số điện thoại lừa đảo</h3>
+    <form method="post" asp-action="ReportPhone" asp-controller="Gr1" enctype="multipart/form-data" id="reportForm">
         <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
         <div class="mb-3">
             <label class="form-label">💳 Số tài khoản ngân hàng</label>

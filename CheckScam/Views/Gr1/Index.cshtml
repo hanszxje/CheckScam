@@ -1,34 +1,79 @@
-﻿@model List<CheckScam.Models.ScamPost>
+﻿@model dynamic
 
 @{
     Layout = "~/Views/Shared/_Gr1Layout.cshtml";
 }
 
 <div class="row">
-    @if (Model.Any())
-    {
-        @foreach (var scam in Model)
-        {
-            <div class="col-md-4 mb-4">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">Tố cáo: @(scam.StkScam ?? scam.SdtScam ?? "Không xác định")</h5>
-                        <p class="card-text">💳 Tài khoản ngân hàng: @(scam.StkScam ?? "Không có")</p>
-                        <p class="card-text">📞 Số điện thoại: @(scam.SdtScam ?? "Không có")</p>
-                        <p class="card-text">📝 Nội dung: @scam.NoiDung.Substring(0, Math.Min(50, scam.NoiDung.Length))@(scam.NoiDung.Length > 50 ? "..." : "")</p>
-                        <p class="card-text">📅 Ngày đăng: @scam.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                        <a href="@Url.Action("ScamDetail", "Gr1", new { id = scam.Id })" class="btn btn-primary">📖 Xem chi tiết</a>
-                    </div>
+    <ul class="nav nav-tabs mb-4" id="indexTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="phone-tab" data-bs-toggle="tab" data-bs-target="#phone" type="button" role="tab">📞 Số điện thoại lừa đảo</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url" type="button" role="tab">🌐 URL lừa đảo</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="indexTabContent">
+        <!-- Tab cho ScamPosts -->
+        <div class="tab-pane fade show active" id="phone" role="tabpanel" aria-labelledby="phone-tab">
+            @if ((ViewBag.ScamPosts as List<CheckScam.Models.ScamPost>)?.Any() ?? false)
+            {
+                <div class="d-flex flex-wrap justify-content-start">
+                    @foreach (var scam in ViewBag.ScamPosts as List<CheckScam.Models.ScamPost>)
+                    {
+                        <div class="col-md-4 mb-4 p-2" style="flex: 0 0 33.3333%; max-width: 33.3333%;">
+                            <div class="card shadow h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tố cáo: @(scam.StkScam ?? scam.SdtScam ?? "Không xác định")</h5>
+                                    <p class="card-text">💳 Tài khoản ngân hàng: @(scam.StkScam ?? "Không có")</p>
+                                    <p class="card-text">📞 Số điện thoại: @(scam.SdtScam ?? "Không có")</p>
+                                    <p class="card-text">📝 Nội dung: @scam.NoiDung.Substring(0, Math.Min(50, scam.NoiDung.Length))@(scam.NoiDung.Length > 50 ? "..." : "")</p>
+                                    <p class="card-text">📅 Ngày đăng: @scam.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                                    <a href="@Url.Action("ScamDetail", "Gr1", new { id = scam.Id })" class="btn btn-primary">📖 Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
-            </div>
-        }
-    }
-    else
-    {
-        <div class="col-12">
-            <p class="text-center">🚫 Không tìm thấy bài tố cáo nào.</p>
+            }
+            else
+            {
+                <div class="col-12">
+                    <p class="text-center">🚫 Không tìm thấy bài tố cáo số điện thoại nào.</p>
+                </div>
+            }
         </div>
-    }
+
+        <!-- Tab cho ScamUrls -->
+        <div class="tab-pane fade" id="url" role="tabpanel" aria-labelledby="url-tab">
+            @if ((ViewBag.ScamUrls as List<CheckScam.Models.ScamUrl>)?.Any() ?? false)
+            {
+                <div class="d-flex flex-wrap justify-content-start">
+                    @foreach (var scamUrl in ViewBag.ScamUrls as List<CheckScam.Models.ScamUrl>)
+                    {
+                        <div class="col-md-4 mb-4 p-2" style="flex: 0 0 33.3333%; max-width: 33.3333%;">
+                            <div class="card shadow h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tố cáo URL: @(scamUrl.Url.Length > 30 ? scamUrl.Url.Substring(0, 30) + "..." : scamUrl.Url)</h5>
+                                    <p class="card-text">🌐 URL: <a href="@scamUrl.Url" target="_blank">@scamUrl.Url</a></p>
+                                    <p class="card-text">📝 Nội dung: @scamUrl.NoiDung.Substring(0, Math.Min(50, scamUrl.NoiDung.Length))@(scamUrl.NoiDung.Length > 50 ? "..." : "")</p>
+                                    <p class="card-text">📅 Ngày đăng: @scamUrl.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                                    <a href="@Url.Action("UrlDetail", "Gr1", new { id = scamUrl.Id })" class="btn btn-primary">📖 Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="col-12">
+                    <p class="text-center">🚫 Không tìm thấy URL tố cáo nào.</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 <div class="d-flex justify-content-center mt-4">

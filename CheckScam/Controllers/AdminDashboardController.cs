@@ -170,5 +170,16 @@ namespace CheckScam.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> UrlDetail(int id)
+        {
+            var scamUrl = await _context.ScamUrls
+                .FirstOrDefaultAsync(u => u.Id == id);
+            if (scamUrl == null)
+            {
+                return NotFound();
+            }
+            return View(scamUrl);
+        }
     }
 }
