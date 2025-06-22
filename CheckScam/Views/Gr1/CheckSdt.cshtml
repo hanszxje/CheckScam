@@ -1,0 +1,73 @@
+﻿@model dynamic
+
+@{
+    Layout = "~/Views/Shared/_Gr1Layout.cshtml";
+}
+
+<div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+    <h3 class="mb-4">🔍 Kiểm tra số điện thoại</h3>
+    <form id="checkSdtForm" method="post">
+        <input type="hidden" name="_RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <div class="mb-3">
+            <label class="form-label">📞 Số điện thoại</label>
+            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" maxlength="20" placeholder="Ví dụ: 0123456789" required />
+        </div>
+        <div id="result" class="mb-3" style="display: none;">
+            <!-- Kết quả sẽ được hiển thị ở đây -->
+        </div>
+        <button type="submit" class="btn btn-primary w-100">🚀 Kiểm tra ngay</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkSdtForm = document.getElementById('checkSdtForm');
+        const phoneNumberInput = document.getElementById('phoneNumber');
+        const resultDiv = document.getElementById('result');
+
+        checkSdtForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const phoneNumber = phoneNumberInput.value.trim();
+            if (!phoneNumber) {
+                resultDiv.innerHTML = '<div class="alert alert-danger">❌ Vui lòng nhập số điện thoại!</div>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('@Url.Action("CheckPhoneNumber", "Gr1")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="_RequestVerificationToken"]').value
+                    },
+                    body: `phoneNumber=${encodeURIComponent(phoneNumber)}`
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const phoneData = data.data;
+                    const isValid = phoneData.valid === true || phoneData.valid === 'true';
+                    const carrier = phoneData.carrier ? phoneData.carrier : 'Không xác định (nguy cơ rủi ro cao)';
+                    resultDiv.innerHTML = `
+                        <div class="alert ${isValid ? 'alert-success' : 'alert-warning'}">
+                            ${isValid ? '✅' : '⚠️'} Số điện thoại: <strong>${phoneData.number || phoneNumber}</strong><br>
+                            <strong>Trạng thái:</strong> ${isValid ? 'Hợp lệ' : 'Không hợp lệ'}<br>
+                            <strong>Nhà mạng:</strong> ${carrier}<br>
+                            ${phoneData.country_name ? `<strong>Quốc gia:</strong> ${phoneData.country_name}<br>` : ''}
+                            ${phoneData.location ? `<strong>Khu vực:</strong> ${phoneData.location}<br>` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">❌ ${data.message}</div>`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">❌ Lỗi hệ thống: ${error.message}</div>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+    });
+</script>

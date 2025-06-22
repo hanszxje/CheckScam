@@ -454,5 +454,52 @@ namespace CheckScam.Controllers
         {
             return View();
         }
+
+        public IActionResult CheckSdt()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckPhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập số điện thoại!" });
+            }
+
+            // Chuẩn hóa số điện thoại để gửi API
+            string normalizedPhone = phoneNumber.StartsWith("0") ? "+84" + phoneNumber.Substring(1) : phoneNumber;
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var apiKey = _configuration["NumverifyApiKey"];
+                var response = await client.GetAsync($"http://apilayer.net/api/validate?access_key={apiKey}&number={normalizedPhone}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    var phoneData = JsonSerializer.Deserialize<Dictionary<string, object>>(result);
+
+                    if (phoneData.ContainsKey("number"))
+                    {
+                        phoneData["number"] = "+84" + phoneData["number"].ToString().Replace("+84", "");
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        data = phoneData
+                    });
+                }
+
+                return Json(new { success = false, message = "Không thể kiểm tra số điện thoại!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi hệ thống: {ex.Message}" });
+            }
+        }
     }
 }
