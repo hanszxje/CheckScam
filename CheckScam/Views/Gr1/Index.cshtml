@@ -25,7 +25,7 @@
                         <div class="col-md-4 mb-4 p-2" style="flex: 0 0 33.3333%; max-width: 33.3333%;">
                             <div class="card shadow h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title">Tố cáo: @(scam.StkScam ?? scam.SdtScam ?? "Không xác định")</h5>
+                                    <h5 class="card-title">Tố cáo: @(scam.SdtScam ?? "Không xác định")</h5>
                                     <p class="card-text">💳 Tài khoản ngân hàng: @(scam.StkScam ?? "Không có")</p>
                                     <p class="card-text">📞 Số điện thoại: @(scam.SdtScam ?? "Không có")</p>
                                     <p class="card-text">📝 Nội dung: @scam.NoiDung.Substring(0, Math.Min(50, scam.NoiDung.Length))@(scam.NoiDung.Length > 50 ? "..." : "")</p>

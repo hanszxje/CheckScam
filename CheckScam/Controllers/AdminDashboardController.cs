@@ -45,7 +45,7 @@ namespace CheckScam.Controllers
                 {
                     return NotFound();
                 }
-                return View("ResultPost", scam);
+                return View("Result", scam);
             }
             else if (type == "url")
             {

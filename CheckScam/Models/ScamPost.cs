@@ -16,7 +16,7 @@ namespace CheckScam.Models
         [Required]
         public string NoiDung { get; set; }
 
-        [StringLength(20)]
+        [StringLength(500)]
         public string Status { get; set; } = "pending";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

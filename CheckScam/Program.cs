@@ -1,4 +1,4 @@
-using CheckScam.Models;
+﻿using CheckScam.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
