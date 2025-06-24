@@ -22,6 +22,15 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<CheckScamDbContext>()
     .AddDefaultTokenProviders();
 
+// Configure Google Authentication
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+    });
+
 // Configure login path
 builder.Services.ConfigureApplicationCookie(options =>
 {

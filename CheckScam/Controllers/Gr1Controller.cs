@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Net.Http;
 using System.IO;
+using System.Security.Claims; // Thêm namespace này
 
 namespace CheckScam.Controllers
 {
@@ -79,6 +80,63 @@ namespace CheckScam.Controllers
             }
             ViewBag.Error = "Sai tài khoản hoặc mật khẩu!";
             return View();
+        }
+
+        // Action để bắt đầu flow đăng nhập Google
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Gr1", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, properties);
+        }
+
+        // Action xử lý callback từ Google
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            if (remoteError != null)
+            {
+                TempData["Error"] = $"Lỗi từ Google: {remoteError}";
+                return RedirectToAction("Login");
+            }
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                TempData["Error"] = "Lỗi khi lấy thông tin đăng nhập từ Google.";
+                return RedirectToAction("Login");
+            }
+
+            // Đăng nhập nếu tài khoản đã liên kết
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (result.Succeeded)
+            {
+                TempData["Success"] = "Đăng nhập bằng Google thành công!";
+                return RedirectToAction("Index");
+            }
+
+            // Nếu chưa có tài khoản liên kết, tạo tài khoản mới
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var username = email; // Dùng email làm username
+
+            var user = new IdentityUser { UserName = username, Email = email };
+            var createResult = await _userManager.CreateAsync(user);
+            if (createResult.Succeeded)
+            {
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                if (addLoginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    TempData["Success"] = "Đăng nhập bằng Google và tạo tài khoản thành công!";
+                    return RedirectToAction("Index");
+                }
+            }
+
+            TempData["Error"] = "Lỗi khi tạo tài khoản từ Google.";
+            return RedirectToAction("Login");
         }
 
         public IActionResult Register()

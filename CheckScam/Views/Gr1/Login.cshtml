@@ -18,7 +18,20 @@
         {
             <div class="alert alert-danger">@ViewBag.Error</div>
         }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
         <button type="submit" class="btn btn-primary w-100">🚀 Vào!!</button>
+    </form>
+    <!-- Nút đăng nhập bằng Google -->
+    <form method="post" asp-action="ExternalLogin" asp-controller="Gr1" class="mt-3">
+        <input type="hidden" name="provider" value="Google" />
+        <button type="submit" class="btn btn-outline-dark w-100">🔵 Đăng nhập bằng Google</button>
     </form>
     <p class="text-center mt-3">
         Chưa tạo tài khoản hả ní? 🐧
