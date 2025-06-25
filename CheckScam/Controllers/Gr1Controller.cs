@@ -1,17 +1,17 @@
-﻿//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Identity;
-//using CheckScam.Models;
-//using CheckScam.Data;
-//using Microsoft.EntityFrameworkCore;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using System.Collections.Generic;
-//using Microsoft.AspNetCore.Authorization;
-//using System.Text.RegularExpressions;
-//using System.Text.Json;
-//using System.Net.Http;
-//using System.IO;
-//using System.Security.Claims; 
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using CheckScam.Models;
+using CheckScam.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
+using System.Text.RegularExpressions;
+using System.Text.Json;
+using System.Net.Http;
+using System.IO;
+using System.Security.Claims;
 
 namespace CheckScam.Controllers
 {
