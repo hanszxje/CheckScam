@@ -7,16 +7,16 @@
 <div class="row">
     <ul class="nav nav-tabs mb-4" id="indexTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="phone-tab" data-bs-toggle="tab" data-bs-target="#phone" type="button" role="tab">📞 Số điện thoại lừa đảo</button>
+            <button class="nav-link @(ViewBag.ActiveTab == "phone" ? "active" : "")" id="phone-tab" data-bs-toggle="tab" data-bs-target="#phone" type="button" role="tab">📞 Số điện thoại lừa đảo</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url" type="button" role="tab">🌐 URL lừa đảo</button>
+            <button class="nav-link @(ViewBag.ActiveTab == "url" ? "active" : "")" id="url-tab" data-bs-toggle="tab" data-bs-target="#url" type="button" role="tab">🌐 URL lừa đảo</button>
         </li>
     </ul>
 
     <div class="tab-content" id="indexTabContent">
         <!-- Tab cho ScamPosts -->
-        <div class="tab-pane fade show active" id="phone" role="tabpanel" aria-labelledby="phone-tab">
+        <div class="tab-pane fade @(ViewBag.ActiveTab == "phone" ? "show active" : "")" id="phone" role="tabpanel" aria-labelledby="phone-tab">
             @if ((ViewBag.ScamPosts as List<CheckScam.Models.ScamPost>)?.Any() ?? false)
             {
                 <div class="d-flex flex-wrap justify-content-start">
@@ -36,6 +36,33 @@
                         </div>
                     }
                 </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            @if (ViewBag.PageNumberPhone > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?pagePhone=1&q=@ViewBag.Query&tab=phone">« Đầu</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?pagePhone=@(ViewBag.PageNumberPhone - 1)&q=@ViewBag.Query&tab=phone">‹ Trước</a>
+                                </li>
+                            }
+                            <li class="page-item disabled">
+                                <span class="page-link">Trang @ViewBag.PageNumberPhone / @ViewBag.TotalPagesPhone</span>
+                            </li>
+                            @if (ViewBag.PageNumberPhone < ViewBag.TotalPagesPhone)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?pagePhone=@(ViewBag.PageNumberPhone + 1)&q=@ViewBag.Query&tab=phone">Tiếp ›</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?pagePhone=@ViewBag.TotalPagesPhone&q=@ViewBag.Query&tab=phone">Cuối »</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
             }
             else
             {
@@ -46,7 +73,7 @@
         </div>
 
         <!-- Tab cho ScamUrls -->
-        <div class="tab-pane fade" id="url" role="tabpanel" aria-labelledby="url-tab">
+        <div class="tab-pane fade @(ViewBag.ActiveTab == "url" ? "show active" : "")" id="url" role="tabpanel" aria-labelledby="url-tab">
             @if ((ViewBag.ScamUrls as List<CheckScam.Models.ScamUrl>)?.Any() ?? false)
             {
                 <div class="d-flex flex-wrap justify-content-start">
@@ -57,13 +84,40 @@
                                 <div class="card-body">
                                     <h5 class="card-title">Tố cáo URL: @(scamUrl.Url.Length > 30 ? scamUrl.Url.Substring(0, 30) + "..." : scamUrl.Url)</h5>
                                     <p class="card-text">🌐 URL: <a href="@scamUrl.Url" target="_blank">@scamUrl.Url</a></p>
-                                    <p class="card-text">📝 Nội dung: @scamUrl.NoiDung.Substring(0, Math.Min(50, scamUrl.NoiDung.Length))@(scamUrl.NoiDung.Length > 50 ? "..." : "")</p>
+                                    <p class="card-text">📝 Nội Dung: @scamUrl.NoiDung.Substring(0, Math.Min(50, scamUrl.NoiDung.Length))@(scamUrl.NoiDung.Length > 50 ? "..." : "")</p>
                                     <p class="card-text">📅 Ngày đăng: @scamUrl.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
                                     <a href="@Url.Action("UrlDetail", "Gr1", new { id = scamUrl.Id })" class="btn btn-primary">📖 Xem chi tiết</a>
                                 </div>
                             </div>
                         </div>
                     }
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            @if (ViewBag.PageNumberUrl > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?pageUrl=1&q=@ViewBag.Query&tab=url">« Đầu</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?pageUrl=@(ViewBag.PageNumberUrl - 1)&q=@ViewBag.Query&tab=url">‹ Trước</a>
+                                </li>
+                            }
+                            <li class="page-item disabled">
+                                <span class="page-link">Trang @ViewBag.PageNumberUrl / @ViewBag.TotalPagesUrl</span>
+                            </li>
+                            @if (ViewBag.PageNumberUrl < ViewBag.TotalPagesUrl)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?pageUrl=@(ViewBag.PageNumberUrl + 1)&q=@ViewBag.Query&tab=url">Tiếp theo</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?pageUrl=@ViewBag.TotalPagesUrl&q=@ViewBag.Query&tab=url">Cuối</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
                 </div>
             }
             else
@@ -76,30 +130,20 @@
     </div>
 </div>
 
-<div class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            @if (ViewBag.PageNumber > 1)
-            {
-                <li class="page-item">
-                    <a class="page-link" href="?page=1&q=@Context.Request.Query["q"]">« Đầu</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page=@(ViewBag.PageNumber - 1)&q=@Context.Request.Query["q"]">‹ Trước</a>
-                </li>
-            }
-            <li class="page-item disabled">
-                <span class="page-link">Trang @ViewBag.PageNumber / @ViewBag.TotalPages</span>
-            </li>
-            @if (ViewBag.PageNumber < ViewBag.TotalPages)
-            {
-                <li class="page-item">
-                    <a class="page-link" href="?page=@(ViewBag.PageNumber + 1)&q=@Context.Request.Query["q"]">Tiếp ›</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page=@ViewBag.TotalPages&q=@Context.Request.Query["q"]">Cuối »</a>
-                </li>
-            }
-        </ul>
-    </nav>
-</div>
+@section Scripts {
+    <script>
+        document.querySelectorAll('#indexTabs .nav-link').forEach(tab => {
+            tab.addEventListener('click', function () {
+                const tabId = this.id.replace('-tab', '');
+                const url = new URL(window.location);
+                url.searchParams.set('tab', tabId);
+                if (tabId === 'phone') {
+                    url.searchParams.delete('pageUrl');
+                } else {
+                    url.searchParams.delete('pagePhone');
+                }
+                window.history.pushState({}, '', url);
+            });
+        });
+    </script>
+}

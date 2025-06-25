@@ -1,31 +1,171 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+﻿/* Modern styles for CheckScam */
 body {
-  margin-bottom: 60px;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    color: #1f2937; /* Màu chữ mặc định xám đậm */
+    min-height: 100vh; /* Đảm bảo chiều cao tối thiểu */
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.navbar {
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #000000 !important; /* Đổi màu chữ tên website sang đen */
+}
+
+    .navbar-brand i {
+        color: #facc15;
+        transition: transform 0.3s ease;
+    }
+
+    .navbar-brand:hover i {
+        transform: scale(1.2);
+    }
+
+.nav-link {
+    color: #000000 !important; /* Giữ màu trắng cho các link khác */
+    font-weight: 500;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+    .nav-link:hover {
+        color: #facc15 !important;
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -4px;
+        left: 0;
+        background-color: #facc15;
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+        width: 100%;
+    }
+
+.dropdown-menu {
+    background-color: #fff;
+    border: none;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    margin-top: 10px;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.dropdown-item {
+    font-weight: 400;
+    padding: 10px 20px;
+    color: #1f2937; /* Màu chữ dropdown xám đậm */
+    transition: all 0.3s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: #f4f7fa;
+        color: #1e3a8a;
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-form .input-group {
+    max-width: 450px;
+    transition: all 0.3s ease;
+}
+
+.search-form .form-control {
+    border-radius: 25px 0 0 25px;
+    border: 1px solid #e5e7eb;
+    padding: 10px 15px;
+    color: #1f2937; /* Màu chữ input xám đậm */
+    transition: all 0.3s ease;
+}
+
+    .search-form .form-control:focus {
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+        border-color: #3b82f6;
+    }
+
+.search-form .input-group-text {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-right: none;
+    color: #6b7280;
+}
+
+.search-form .btn {
+    border-radius: 0 25px 25px 0;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .search-form .btn:hover {
+        background-color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+
+footer {
+    background: linear-gradient(90deg, #111827, #1f2937);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+    footer h5 {
+        font-weight: 600;
+        color: #facc15;
+        border-bottom: 2px solid #facc15;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+    }
+
+    footer a {
+        color: #000000 !important; /* Đổi màu chữ footer sang đen, đồng bộ với navbar brand */
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* Thêm bóng để nổi trên nền tối */
+        transition: all 0.3s ease;
+    }
+
+        footer a:hover {
+            color: #facc15 !important;
+            text-shadow: none; /* Loại bỏ bóng khi hover */
+        }
+
+    footer .social-icons i {
+        font-size: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    footer .social-icons a:hover i {
+        transform: scale(1.2);
+    }
+
+main {
+    flex: 1 0 auto; /* Đảm bảo main đẩy footer xuống */
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Debug style - Remove after testing */
+.debug-border {
+    border: 1px solid red;
 }

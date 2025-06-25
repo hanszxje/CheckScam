@@ -32,8 +32,11 @@ namespace CheckScam.Controllers
             _configuration = configuration;
         }
 
-        public async Task<IActionResult> Index(int? page, string q)
+        public async Task<IActionResult> Index(int? pagePhone, int? pageUrl, string q, string tab = "phone")
         {
+            // Validate tab parameter
+            tab = (tab == "url") ? "url" : "phone";
+
             var scamPosts = _context.ScamPosts
                 .Where(p => p.Status == "approved");
 
@@ -47,21 +50,28 @@ namespace CheckScam.Controllers
             }
 
             int pageSize = 6;
-            int pageNumber = page ?? 1;
+            int pageNumberPhone = pagePhone ?? 1;
+            int pageNumberUrl = pageUrl ?? 1;
+
             var paginatedPosts = await scamPosts
                 .Include(p => p.Images)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-            var paginatedUrls = await scamUrls
-                .Skip((pageNumber - 1) * pageSize)
+                .Skip((pageNumberPhone - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            ViewBag.PageNumber = pageNumber;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)Math.Max(await scamPosts.CountAsync(), await scamUrls.CountAsync()) / pageSize);
+            var paginatedUrls = await scamUrls
+                .Skip((pageNumberUrl - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.PageNumberPhone = pageNumberPhone;
+            ViewBag.PageNumberUrl = pageNumberUrl;
+            ViewBag.TotalPagesPhone = (int)Math.Ceiling((double)await scamPosts.CountAsync() / pageSize);
+            ViewBag.TotalPagesUrl = (int)Math.Ceiling((double)await scamUrls.CountAsync() / pageSize);
             ViewBag.ScamPosts = paginatedPosts;
             ViewBag.ScamUrls = paginatedUrls;
+            ViewBag.ActiveTab = tab;
+            ViewBag.Query = q;
             return View();
         }
 
@@ -82,7 +92,6 @@ namespace CheckScam.Controllers
             return View();
         }
 
-        // Action để bắt đầu flow đăng nhập Google
         [HttpPost]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
@@ -91,7 +100,6 @@ namespace CheckScam.Controllers
             return new ChallengeResult(provider, properties);
         }
 
-        // Action xử lý callback từ Google
         [HttpGet]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
@@ -110,7 +118,6 @@ namespace CheckScam.Controllers
                 return RedirectToAction("Login");
             }
 
-            // Đăng nhập nếu tài khoản đã liên kết
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
@@ -118,9 +125,8 @@ namespace CheckScam.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Nếu chưa có tài khoản liên kết, tạo tài khoản mới
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var username = email; // Dùng email làm username
+            var username = email;
 
             var user = new IdentityUser { UserName = username, Email = email };
             var createResult = await _userManager.CreateAsync(user);
@@ -526,7 +532,6 @@ namespace CheckScam.Controllers
                 return Json(new { success = false, message = "Vui lòng nhập số điện thoại!" });
             }
 
-            // Chuẩn hóa số điện thoại để gửi API
             string normalizedPhone = phoneNumber.StartsWith("0") ? "+84" + phoneNumber.Substring(1) : phoneNumber;
 
             try

@@ -17,24 +17,32 @@ namespace CheckScam.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string tab = "post")
         {
+            tab = (tab == "url") ? "url" : "post";
+
             var scamPosts = await _context.ScamPosts
                 .Where(p => p.Status == "pending")
+                .Include(p => p.Images)
                 .ToListAsync();
+
             var scamUrls = await _context.ScamUrls
                 .Where(u => u.Status == "pending")
                 .ToListAsync();
+
             ViewBag.ScamPosts = scamPosts;
             ViewBag.ScamUrls = scamUrls;
+            ViewBag.ActiveTab = tab;
+
             if (TempData["Message"] != null)
             {
                 ViewBag.Message = TempData["Message"];
             }
+
             return View();
         }
 
-        public async Task<IActionResult> Result(int id, string type)
+        public async Task<IActionResult> Result(int id, string type, string tab = "post")
         {
             if (type == "post")
             {
@@ -45,6 +53,7 @@ namespace CheckScam.Controllers
                 {
                     return NotFound();
                 }
+                ViewBag.ActiveTab = tab;
                 return View("Result", scam);
             }
             else if (type == "url")
@@ -55,20 +64,28 @@ namespace CheckScam.Controllers
                 {
                     return NotFound();
                 }
+                ViewBag.ActiveTab = tab;
                 return View("ResultUrl", scamUrl);
             }
             return NotFound();
         }
 
         [HttpPost]
-        public async Task<IActionResult> ApproveOrReject(int id, string type, string action)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveOrReject(int id, string type, string action, string tab)
         {
+            if (string.IsNullOrEmpty(tab))
+            {
+                tab = type == "url" ? "url" : "post";
+            }
+
             if (type == "post")
             {
                 var scam = await _context.ScamPosts.FindAsync(id);
                 if (scam == null)
                 {
-                    return NotFound();
+                    TempData["Message"] = $"❌ Không tìm thấy bài tố cáo!";
+                    return RedirectToAction("Index", new { tab });
                 }
 
                 if (action == "approve")
@@ -89,7 +106,8 @@ namespace CheckScam.Controllers
                 var scamUrl = await _context.ScamUrls.FindAsync(id);
                 if (scamUrl == null)
                 {
-                    return NotFound();
+                    TempData["Message"] = $"❌ Không tìm thấy URL tố cáo!";
+                    return RedirectToAction("Index", new { tab });
                 }
 
                 if (action == "approve")
@@ -106,12 +124,18 @@ namespace CheckScam.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { tab });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id, string type)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, string type, string tab)
         {
+            if (string.IsNullOrEmpty(tab))
+            {
+                tab = type == "url" ? "url" : "post";
+            }
+
             if (type == "post")
             {
                 var scam = await _context.ScamPosts
@@ -120,7 +144,7 @@ namespace CheckScam.Controllers
                 if (scam == null)
                 {
                     TempData["Message"] = $"❌ Không tìm thấy bài tố cáo!";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Index", new { tab });
                 }
 
                 try
@@ -152,7 +176,7 @@ namespace CheckScam.Controllers
                 if (scamUrl == null)
                 {
                     TempData["Message"] = $"❌ Không tìm thấy URL tố cáo!";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Index", new { tab });
                 }
 
                 try
@@ -168,10 +192,10 @@ namespace CheckScam.Controllers
                 }
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { tab });
         }
 
-        public async Task<IActionResult> UrlDetail(int id)
+        public async Task<IActionResult> UrlDetail(int id, string tab = "url")
         {
             var scamUrl = await _context.ScamUrls
                 .FirstOrDefaultAsync(u => u.Id == id);
@@ -179,6 +203,7 @@ namespace CheckScam.Controllers
             {
                 return NotFound();
             }
+            ViewBag.ActiveTab = tab;
             return View(scamUrl);
         }
     }
